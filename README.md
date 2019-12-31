@@ -1,5 +1,4 @@
 # Arduino_UKF_Library
- A  (UKF library for Teensy4/Arduino system (or any real time embedded system in general)
 This is a compact Unscented Kalman Filter (UKF) library for Teensy4.0/Arduino system (or real time embedded system in general).
 - It's not using Eigen (small source code - more simple to understand).
 - It's not using C++ Standard Library/std (for embedded consideration).
@@ -9,17 +8,25 @@ This is a compact Unscented Kalman Filter (UKF) library for Teensy4.0/Arduino sy
 
 # The Background
 The Extended Kalman Filter is the de facto industrial ...
-Unscented Kalman Filter...
+
+The Unscented Kalman Filter is designed to handle state variable estimation where the system is highly nonlinear. Unfortunately, the algorithm is quite complex compared to Extended Kalman Flter. So, this library is made for any student who want to learn the structure of UKF, the computer code implementation of it, and how to use the filter for a nontrivial problem.
 
 This library is made with specific goal for educational purpose (I've made decision to sacrifice speed to get best code readability I could get) while still capable of tackling real-time control system implementation (the code is computed in less than **300 us**! See *Some Benchmark* section below).
 
 Without further ado, first some definition:
 ![UKF Definition](UKF_Definition.png "Click to maximize if the image rescaling make you dizzy")
 
-
-
-LOREM IPSUM DOLOR SI AMET LOREM IPSUM DOLOR SI AMET LOREM IPSUM DOLOR SI AMET LOREM IPSUM DOLOR SI AMET LOREM IPSUM DOLOR SI AMET 
-
-
-
+Many author blended the unscented transformation into kalman filter structure (even in the Jeffrey Uhlmann's original paper) to make it into a familiar KF structure. But in this implementation, I prefer to emphasize the unscented transformation structure in the hope you can get the big idea of the transformation. That make the implementation somewhat different from a typical UKF formulation, but in essence it's all the same. So the UKF algorithm can be descibed as:
 ![UKF Calculation](UKF_Calculation.png "Click to maximize if the image rescaling make you dizzy")
+
+
+
+# How to Use
+
+
+
+# Some Benchmark
+
+
+# Closing Remark
+
