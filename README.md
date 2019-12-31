@@ -7,7 +7,7 @@ This is a compact Unscented Kalman Filter (UKF) library for Teensy4.0/Arduino sy
 
 
 # The Background
-The Unscented Kalman Filter is designed to handle state variable estimation where the system is highly nonlinear that the EKF will do job poorly, or even fail to do (like for non-differentiable nonlinear system). Unfortunately, the algorithm is quite complex compared to Extended Kalman Flter. With that in mind, I made this library for any student who want to learn the structure of UKF, the computer code implementation of it, and how to use the filter for a nontrivial problem.
+The Unscented Kalman Filter is designed to handle state variable estimation where the system is highly nonlinear that the Extended Kalman Flter (EKF) will do job poorly, or even fail to do (like for non-differentiable nonlinear system). Unfortunately, the algorithm is quite complex compared to EKF. With that in mind, I made this library for any student who want to learn the structure of UKF, the computer code implementation of it, and how to use the filter for a nontrivial problem.
 
 This library is made with specific goal for educational purpose (I've made decision to sacrifice speed to get best code readability I could get) while still capable of tackling real-time control system implementation (the code is computed in less than **300 us**! See *Some Benchmark* section below).
 
