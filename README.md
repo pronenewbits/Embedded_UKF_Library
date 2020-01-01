@@ -12,12 +12,12 @@ The Unscented Kalman Filter is designed to handle state variable estimation wher
 This library is made with specific goal for educational purpose (I've made decision to sacrifice speed to get best code readability I could get) while still capable of tackling real-time control system implementation (the code is computed in less than **300 us**! See *Some Benchmark* section below).
 
 Without further ado, first some definition:
-![UKF Definition](UKF_Definition.png "Click to maximize if the image rescaling make you dizzy")
+![UKF Definition](UKF_Definition.png "Click to maximize if the image rescaling make you feel dizzy")
 
 Many authors blended the unscented transformation into kalman filter structure (even in the Jeffrey Uhlmann's paper) to make it into a familiar KF structure. But in this implementation, I prefer to emphasize the unscented transformation structure in the hope you can get the big idea of the transformation more easily. That make the implementation somewhat different from a typical UKF formulation, but in essence it's all the same. 
 
 The UKF algorithm can be descibed as:
-![UKF Calculation](UKF_Calculation.png "Click to maximize if the image rescaling make you dizzy")
+![UKF Calculation](UKF_Calculation.png "Click to maximize if the image rescaling make you feel dizzy")
 
 
 
