@@ -17,7 +17,7 @@ Without further ado, first some definition:
 Many authors blended the unscented transformation into kalman filter structure (even in the Jeffrey Uhlmann's paper) to make it into a familiar KF structure. But in this implementation, I prefer to emphasize the unscented transformation structure in the hope you can get the big idea of the transformation more easily. That make the implementation somewhat different from a typical UKF formulation, but in essence it's all the same. 
 
 The UKF algorithm can be descibed as:
-![UKF Calculation](UKF_Calculation.png "Click to maximize if the image rescaling make you dizzy")
+![UKF Calculation](UKF_Calculation_smol.png "Click to maximize if the image rescaling make you dizzy")
 
 
 
