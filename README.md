@@ -3,7 +3,7 @@ This is a compact Unscented Kalman Filter (UKF) library for Teensy4.0/Arduino sy
 - It's not using Eigen (small source code - more simple to understand).
 - It's not using C++ Standard Library/std (for embedded consideration).
 - If you set `SYSTEM_IMPLEMENTATION` to `SYSTEM_IMPLEMENTATION_EMBEDDED_NO_PRINT` in `konfig.h`, the code is platform agnostic (not using any library beside these C header files: `stdlib.h`, `stdint.h`, and `math.h`).
-- There's no malloc/new/free dynamic memory allocation for real time application (but using heavy stack local variables, so you need to run it through static memory analyzer if you are really concerned about hard real time application).
+- There's no malloc/new/free dynamic memory allocation for real time application (but using heavy stack local variables, so you need to run it through static memory analyzer if you are really concerned about implement this in mission critical hard real time application).
 
 
 # The Background
@@ -46,6 +46,10 @@ The code is tested on compiler Arduino IDE 1.8.10 and hardware Teensy 4.0 Platfo
 
 *For PC configuration (`SYSTEM_IMPLEMENTATION` is set to `SYSTEM_IMPLEMENTATION_PC` in `konfig.h`):
 The code is tested on compiler Qt Creator 4.8.2 and typical PC Platform.
+
+
+**Important note: For Teensy 4.0, I encounter RAM limitation where the `MATRIX_MAXIMUM_SIZE` can't be more than 28 (if you are using double precision) or 40 (if using single precision). If you already set more than that, your Teensy might be unable to be programmed (a bug in the Teensy bootloader?). The solution is simply to change the `MATRIX_MAXIMUM_SIZE` to be less than that, compile & upload the code from the compiler (the IDE then will protest that it cannot find the Teensy board), and click the program button on the Teensy board to force the bootloader to restart and download the firmware from the computer.**
+
 
 # Some Benchmark
 The computation time needed to compute one iteration of `UKF::bUpdate(Y,U)` function are:
