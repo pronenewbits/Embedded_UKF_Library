@@ -6,7 +6,6 @@
 #include "MPU9250.h"
 
 
-// -0.00,0.01,-1.00,    -0.20,-0.88,0.43,   0.01,-0.02,0.02,
 // 0.01,-0.03,-1.00,    -0.41,-0.73,0.55,   -0.82,0.60,-0.12,
 // 0.00,-0.02,-1.00,    -0.38,0.74,-0.55,   -0.05,-0.19,0.14,
 #define IMU_ACC_Z0          (-1)
@@ -71,7 +70,7 @@ void setup() {
 }
 
 
-/* Function to interface with the Processing script in the computer */
+/* Function to interface with the Processing script in the PC */
 void serialFloatPrint(float f) {
     byte * b = (byte *) &f;
     for (int i = 0; i < 4; i++) {
@@ -191,7 +190,7 @@ void loop() {
     }
     
     
-    /* The serial data is sent by responding to command from the computer running Processing scipt */
+    /* The serial data is sent by responding to command from the PC running Processing scipt */
     if (Serial.available()) {
         cmd = Serial.read();
         if (cmd == 'v') {

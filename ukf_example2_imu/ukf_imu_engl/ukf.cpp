@@ -9,7 +9,7 @@
  *
  *        Where:
  *          x(k) : State Variable at time-k                          : Nx1
- *          z(k) : Measured output at time-k                         : Zx1
+ *          y(k) : Measured output at time-k                         : Zx1
  *          u(k) : System input at time-k                            : Mx1
  *          v(k) : Process noise, AWGN assumed, w/ covariance  Rv    : Nx1
  *          n(k) : Measurement noise, AWGN assumed, w/ covariance Rn : Nx1
@@ -148,7 +148,7 @@ void UKF::vReset(Matrix &XInit, const float_prec PInit, const float_prec RvInit,
 }
 
 
-bool UKF::bUpdate(Matrix &Z, Matrix &U)
+bool UKF::bUpdate(Matrix &Y, Matrix &U)
 {
     /* Run once every sampling time */
 
@@ -193,7 +193,7 @@ bool UKF::bUpdate(Matrix &Z, Matrix &U)
     /* Update the Estimated State Variable:
      *  x(k|k)      = x(k|k-1) + K * (y(k) - y_est(k))                      ...{UKF_11}
      */
-    Err = Z - Y_Est;
+    Err = Y - Y_Est;
     X_Est = X_Est + (Gain*Err);
     
     
