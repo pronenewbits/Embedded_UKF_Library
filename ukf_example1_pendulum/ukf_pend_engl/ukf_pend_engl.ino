@@ -55,7 +55,7 @@
 /* Just example */
 #define P_INIT      (100)
 #define Rv_INIT     (0.01)
-#define Rn_INIT     (0.3)
+#define Rn_INIT     (1.)
 
 
 bool Main_bUpdateNonlinearX(Matrix &X_Next, Matrix &X, Matrix &U);
@@ -112,7 +112,7 @@ void loop() {
         Y[1][0] = -cos(theta) * pend_l;
         
         /* Let's add some noise! */
-        Y[0][0] += (float((rand() % 2) - 1) / 10.);       /* add +/- 0.1 meters noise to x position */
+        Y[0][0] += (float((rand() % 20) - 10) / 10.);       /* add +/- 1 meters noise to x position */
         
         /* ------------------ Read the sensor data / simulate the system here ------------------ */
         
@@ -131,7 +131,7 @@ void loop() {
         
         
         /* =========================== Print to serial (for plotting) ========================== */
-        #if (1)
+        #if (0)
             /* Print: Computation time, x1 (without noise), x1 estimated */
             snprintf(bufferTxSer, sizeof(bufferTxSer)-1, "%.3f %.3f %.3f ", ((float)u64compuTime)/1000., X_true[0][0], UKF_IMU.GetX()[0][0]);
             Serial.print(bufferTxSer);
