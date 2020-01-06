@@ -15,13 +15,14 @@ public:
     Matrix GetY() { return Y_Est; }
     Matrix GetP() { return P; }
     Matrix GetErr() { return Err; }
-
+    
 protected:
     bool bCalculateSigmaPoint();
     bool bUnscentedTransform(Matrix &Out, Matrix &OutSigma, Matrix &P, Matrix &DSig,
                              bool (*_vFuncNonLinear)(Matrix &xOut, Matrix &xInp, Matrix &U),
                              Matrix &InpSigma, Matrix &InpVector,
                              Matrix &_CovNoise);
+    
 private:
     bool (*bNonlinearUpdateX)(Matrix &X_Next, Matrix &X, Matrix &U);
     bool (*bNonlinearUpdateY)(Matrix &Z, Matrix &X, Matrix &U);

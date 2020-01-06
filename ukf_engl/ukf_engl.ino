@@ -55,7 +55,7 @@ void loop() {
         
         /* =========================== Print to serial (for plotting) ========================== */
         #if (1)
-            /* Print: Computation time, X_Est */
+            /* Print: Computation time, X_Est[0] */
             snprintf(bufferTxSer, sizeof(bufferTxSer)-1, "%.3f %.3f ", ((float)u64compuTime)/1000., UKF_IMU.GetX()[0][0]);
             Serial.print(bufferTxSer);
         #endif
