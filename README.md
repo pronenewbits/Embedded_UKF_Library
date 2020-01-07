@@ -37,7 +37,7 @@ After that, you only need to initialize the UKF class, setting the non-zero init
 
 To see how you can implement the library in non-trivial application, I implement 2 example:
 1.  [ukf_example1_pendulum](ukf_example1_pendulum). This example simulate the damped pendulum. See the [README file](ukf_example1_pendulum/README.md) inside the folder to get more information. 
-2.  [ukf_example2_imu](ukf_example2_imu). This example process IMU sensor MPU9250. See the [README file](ukf_example2_imu/README.md) inside the folder to get more information.
+2.  [ukf_example2_imu](ukf_example2_imu). This example process IMU (Inertial Measurement Unit) data using sensor MPU9250. See the [README file](ukf_example2_imu/README.md) inside the folder to get more information.
 
 &nbsp;
 
