@@ -1,5 +1,5 @@
 # The system description
-In this example, we will implement the UKF to estimate a simple damped pendulum system. Wikipedia has good explanation for [an undamped system](https://en.wikipedia.org/wiki/Pendulum_(mathematics)#Simple_gravity_pendulum) with good animation, while [this website](http://www.nld.ds.mpg.de/applets/pendulum/eqm2.htm) has explamation for the damped one.
+In this example, we will implement the UKF to estimate a simple damped pendulum system. Wikipedia has good explanation for [an undamped system](https://en.wikipedia.org/wiki/Pendulum_(mathematics)#Simple_gravity_pendulum) with good animation, while [this website](http://www.nld.ds.mpg.de/applets/pendulum/eqm2.htm) has explanation for the damped one.
 
 The variables of the system can be seen from this picture:
 <p align="center"><img src="Pendulum_picture.png" alt="Pendulum picture"></p>
