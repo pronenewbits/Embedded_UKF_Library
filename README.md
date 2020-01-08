@@ -53,7 +53,7 @@ The code is tested on compiler Qt Creator 4.8.2 and typical PC Platform.
 
 # Some Benchmark
 The computation time needed to compute one iteration of `UKF::bUpdate(Y,U)` function are:
-1. [ukf_example1_pendulum](ukf_example1_pendulum) (2 state, no input, 2 output): **97 us** to compute one iteration (single precision math) or **153 us** (double precision). The result, plotted using Scilab (you can see at the beginning, the estimated value is converging to the truth despite wrong initial value):
+1. [ukf_example1_pendulum](ukf_example1_pendulum) (2 state, no input, 2 output): **97 us** to compute one iteration (single precision math) or **153 us** (double precision). The result, plotted using [Scilab](https://www.scilab.org/) (you can see at the beginning, the estimated value is converging to the truth despite wrong initial value):
 <p align="center"><img src="ukf_example1_pendulum/result.png" alt="Result for Pendulum simulation"></p>
 
 
