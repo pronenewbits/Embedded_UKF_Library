@@ -4,7 +4,7 @@ In this example, we will implement the UKF to estimate a simple damped pendulum 
 The variables of the system can be seen from this picture:
 <p align="center"><img src="Pendulum_picture.png" alt="Pendulum picture"></p>
 
-While the system equation is:
+While the system equations can be described as:
 <p align="center"><img src="Pendulum_eq.png" alt="Pendulum equation"></p>
 
 # The implementation
