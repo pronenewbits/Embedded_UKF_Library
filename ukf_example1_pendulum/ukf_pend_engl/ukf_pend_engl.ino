@@ -173,8 +173,8 @@ bool Main_bUpdateNonlinearX(Matrix &X_Next, Matrix &X, Matrix &U)
 bool Main_bUpdateNonlinearY(Matrix &Y, Matrix &X, Matrix &U)
 {
     /*  The output (in discrete time):
-     *      y1(k) =  sin(x1(k))
-     *      y2(k) = -cos(x1(k))
+     *      y1(k) =  sin(x1(k)) * l
+     *      y2(k) = -cos(x1(k)) * l
      */
     float_prec theta     = X[0][0];
     
