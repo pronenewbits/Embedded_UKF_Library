@@ -30,8 +30,8 @@ Then we implement the state space nonlinear update & measurement function in `uk
     bool Main_bUpdateNonlinearY(Matrix &Y, Matrix &X, Matrix &U)
     {
         /*  The output (in discrete time):
-        *      y1(k) =  sin(x1(k))
-        *      y2(k) = -cos(x1(k))
+        *      y1(k) =  sin(x1(k)) * l
+        *      y2(k) = -cos(x1(k)) * l
         */
         ...
         return true;
