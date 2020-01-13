@@ -33,7 +33,7 @@ For custom implementation, typically you only need to modify `konfig.h` and `*.i
 1. Set the length of `X, U, Z` vectors and sampling time `dt` in `konfig.h`, depend on your model.
 2. Implement the nonlinear update function `f(x)`, measurement function `h(x)`, initialization value `P(k=0)`, and `Rv & Rn` constants value in the `*.ino` file.
 
-After that, you only need to initialize the UKF class, setting the non-zero initialization matrix by calling `UKF::vReset(X_INIT, P_INIT, Rv_INIT, Rn_INIT)` function at inialization, and calling `UKF::bUpdate(Y,U)` function every sampling time.
+After that, you only need to initialize the UKF class, set the non-zero initialization matrix by calling `UKF::vReset(X_INIT, P_INIT, Rv_INIT, Rn_INIT)` function at initialization, and call `UKF::bUpdate(Y,U)` function every sampling time.
 
 To see how you can implement the library in non-trivial application, I implement 2 example:
 1.  [ukf_example1_pendulum](ukf_example1_pendulum). This example simulate the damped pendulum. See the [README file](ukf_example1_pendulum/README.md) inside the folder to get more information. 
