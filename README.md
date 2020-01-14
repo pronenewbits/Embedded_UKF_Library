@@ -22,7 +22,7 @@ The UKF algorithm can be descibed as:
 
 
 # How to Use
-The UKF code is self contained and can be acessed in the folder [ukf_engl](ukf_engl) (this is the template project). Inside you will find these files:
+The UKF code is self contained and can be accessed in the folder [ukf_engl](ukf_engl) (this is the template project). Inside you will find these files:
 - matrix.h  : The backbone of all my code in this account. This code contain the class for Matrix operation.
 - ukf.h     : The header file of the Unscented Kalman Filter Class.
 - ukf.cpp   : The source file of the Unscented Kalman Filter Class.
