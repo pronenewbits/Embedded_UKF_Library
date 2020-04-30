@@ -111,7 +111,7 @@ void setup() {
     X_true[0][0] = 3.14159265359/2.;
     
     /* Observe that we set the wrong initial x_estimated value!  (X_UKF(k=0) != X_TRUE(k=0)) */
-    X_est_init[0][0] = -3.14159265359/2;
+    X_est_init[0][0] = -3.14159265359/2.;
     
     UKF_IMU.vReset(X_est_init, UKF_PINIT, UKF_RvINIT, UKF_RnINIT);
 }
