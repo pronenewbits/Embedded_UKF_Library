@@ -24,11 +24,10 @@ The UKF algorithm can be descibed as:
 
 # How to Use
 The UKF code is self contained and can be accessed in the folder [ukf_engl](ukf_engl) (this is the template project). Inside you will find these files:
-- matrix.h  : The backbone of all my code in this account. This code contain the class for Matrix operation.
-- ukf.h     : The header file of the Unscented Kalman Filter Class.
-- ukf.cpp   : The source file of the Unscented Kalman Filter Class.
-- konfig.h  : The configuration file.
-- ukf_engl.ino : The arduino main file (this is only the template file).
+- `matrix.h/cpp` : The backbone of all my code in this account. This files contain the class for Matrix operation.
+- `ukf.h/cpp` : The source files of the Unscented Kalman Filter Class.
+- `konfig.h` : The configuration file.
+- `ukf_engl.ino` : The arduino main file (this is only the template file).
 
 For custom implementation, typically you only need to modify `konfig.h` and `*.ino` files. Where basically you need to:
 1. Set the length of `X, U, Z` vectors and sampling time `dt` in `konfig.h`, depend on your model.
