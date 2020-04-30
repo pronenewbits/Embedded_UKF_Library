@@ -2,14 +2,14 @@
 This is a compact Unscented Kalman Filter (UKF) library for Teensy4.0/Arduino system (or real time embedded system in general).
 - It's not using Eigen (small source code - more simple to understand).
 - It's not using C++ Standard Library/std (for embedded consideration).
-- If you set `SYSTEM_IMPLEMENTATION` to `SYSTEM_IMPLEMENTATION_EMBEDDED_NO_PRINT` in `konfig.h`, the code is platform agnostic (not using any library beside these C header files: `stdlib.h`, `stdint.h`, and `math.h`).
+- If you set `SYSTEM_IMPLEMENTATION` to `SYSTEM_IMPLEMENTATION_EMBEDDED_NO_PRINT` in `konfig.h`, the code is platform agnostic (not using any library beside these C header files: `stdlib.h`, `stdint.h`, `stdbool.h`, `string.h`, and `math.h`).
 - There's no malloc/new/free dynamic memory allocation for real time application (but using heavy stack local variables, so you need to run it through static memory analyzer if you are really concerned about implement this in mission critical hard real time application).
 
 
 # The Background
 The Unscented Kalman Filter is designed to handle state variable estimation where the system is highly nonlinear that the Extended Kalman Flter (EKF) will do the job poorly, or even fail to do so (e.g. for non-differentiable nonlinear system). Unfortunately, the algorithm is quite complex compared to EKF. With that in mind, I made this library for any student who want to learn the structure of UKF, the computer code implementation of it, and how to use the filter for a nontrivial problem.
 
-This library is made with specific goal for educational purpose (I've made decision to sacrifice speed to get best code readability I could get) while still capable of tackling real-time control system implementation (the code is computed in around **300 us** for non trivia application! See *Some Benchmark* section below). I strongly suggest you to [learn the EKF first in my other repository (Arduino_EKF_Library)](https://github.com/pronenewbits/Arduino_EKF_Library) before delve deeper into UKF, because many UKF motivation and design lies on analyzing EKF weakness (specifically, on its need for linearization).
+This library is made with specific goal for educational purpose (I've made decision to sacrifice speed to get best code readability I could get) while still capable of tackling real-time control system implementation (the code is computed under **250 us** for non trivia application! See *[Some Benchmark](README.MD#some-benchmark)* section below). I strongly suggest you to [learn the EKF first in my other repository (Arduino_EKF_Library)](https://github.com/pronenewbits/Arduino_EKF_Library) before delve deeper into UKF, because many UKF motivation and design lies on analyzing EKF weakness (specifically, on its need for linearization).
 
 
 Without further ado, first some definition:
@@ -54,17 +54,17 @@ The code is tested on compiler Qt Creator 4.8.2 and typical PC Platform.
 
 # Some Benchmark
 The computation time needed to compute one iteration of `UKF::bUpdate(Y,U)` function are:
-1. [ukf_example1_pendulum](ukf_example1_pendulum) (2 state, no input, 2 output): **97 us** to compute one iteration (single precision math) or **153 us** (double precision). The result, plotted using [Scilab](https://www.scilab.org/) (you can see at the beginning, the estimated value is converging to the truth despite wrong initial value):
+1. [ukf_example1_pendulum](ukf_example1_pendulum) (2 state, no input, 2 output): **45 us** to compute one iteration (single precision math) or **53 us** (double precision). The result, plotted using [Scilab](https://www.scilab.org/) (you can see at the beginning, the estimated value is converging to the truth despite wrong initial value):
 <p align="center"><img src="ukf_example1_pendulum/result.png" alt="Result for Pendulum simulation"></p>
 
 
-2. [ukf_example2_imu](ukf_example2_imu) (4 state, 3 input, 6 output): **227 us** to compute one iteration (single precision math) or **352 us** (double precision). The result, displayed by [Processing](https://processing.org/) script based on [FreeIMU project](http://www.varesano.net/files/FreeIMU-20121122_1126.zip):
+2. [ukf_example2_imu](ukf_example2_imu) (4 state, 3 input, 6 output): **206 us** to compute one iteration (single precision math) or **246 us** (double precision). The result, displayed by [Processing](https://processing.org/) script based on [FreeIMU project](http://www.varesano.net/files/FreeIMU-20121122_1126.zip):
 <p align="center"><img src="ukf_example2_imu/result.png" alt="Result for IMU visualization"></p>
 
 You can also see the video in the [ukf_example2_imu](ukf_example2_imu) folder.
 
 
 # Closing Remark
-The matrix.h library's code documentation is still in Indonesian, and I plan to translate it into English soon (stay tuned!). In the meantime, it will be nice if you can test & validate my result or inform me if there are some bugs you encounter along the way! (or if you notice some grammar error in the documentation).
+I hope you can test & validate my result or inform me if there are some bugs / mathematical error you encounter along the way! (or if you notice some grammar error in the documentation).
 
 I published the code under CC0 license, effectively placed the code on public domain. But it will be great if you can tell me if you use the code, for what/why. That means a lot to me and give me motivation to expand the work (⌒▽⌒)

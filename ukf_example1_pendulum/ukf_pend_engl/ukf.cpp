@@ -1,4 +1,4 @@
-/**********************************************************************************************************************
+/***********************************************************************************************************************
  *  Class for Discrete Unscented Kalman Filter 
  *  Ref: Van der. Merwe, .. (2004). Sigma-Point Kalman Filters for Probabilistic Inference in Dynamic 
  *      State-Space Models (Ph.D. thesis). Oregon Health & Science University.
@@ -16,15 +16,15 @@
  *
  *          f(..), h(..) is a nonlinear transformation of the system to be estimated.
  *
- **********************************************************************************************************************
+ ***********************************************************************************************************************
  *      Unscented Kalman Filter algorithm:
  *          Initialization:
- *              P (k=0|k=0) = Identitas * covariant(P(k=0)), typically initialized with some big number.
- *              x(k=0|k=0)  = Expected value of x at time-0 (i.e. x(k=0)), typically set to zero.
- *              Rv, Rn      = Covariance matrices of process & measurement. As this implementation 
- *                              the noise as AWGN (and same value for every variable), this is set
- *                              to Rv=diag(RvInit,...,RvInit) and Rn=diag(RnInit,...,RnInit).
- *              Wc, Wm      = First order & second order weight, respectively.
+ *              P(k=0|k=0) = Identity matrix * covariant(P(k=0)), typically initialized with some big number.
+ *              x(k=0|k=0) = Expected value of x at time-0 (i.e. x(k=0)), typically set to zero.
+ *              Rv, Rn     = Covariance matrices of process & measurement. As this implementation 
+ *                             the noise as AWGN (and same value for every variable), this is set
+ *                             to Rv=diag(RvInit,...,RvInit) and Rn=diag(RnInit,...,RnInit).
+ *              Wc, Wm     = First order & second order weight, respectively.
  *              alpha, beta, kappa, gamma = scalar constants.
  *              
  *              lambda = (alpha^2)*(N+kappa)-N,         gamma = sqrt(N+alpha)           ...{UKF_1}
@@ -93,19 +93,21 @@
 #include "ukf.h"
 
 
-UKF::UKF(Matrix &XInit, bool (*bNonlinearUpdateX)(Matrix &, Matrix &, Matrix &), bool (*bNonlinearUpdateY)(Matrix &, Matrix &, Matrix &), const float_prec PInit, const float_prec RvInit, const float_prec RnInit)
+UKF::UKF(const Matrix& XInit, const Matrix& PInit, const Matrix& Rv, const Matrix& Rn,
+         bool (*bNonlinearUpdateX)(Matrix&, const Matrix&, const Matrix&),
+         bool (*bNonlinearUpdateY)(Matrix&, const Matrix&, const Matrix&))
 { 
     /* Initialization:
-     *  P (k=0|k=0) = Identitas * covariant(P(k=0)), typically initialized with some big number.
-     *  x(k=0|k=0)  = Expected value of x at time-0 (i.e. x(k=0)), typically set to zero.
-     *  Rv, Rn      = Covariance matrices of process & measurement. As this implementation 
+     *  P(k=0|k=0) = Identity matrix * covariant(P(k=0)), typically initialized with some big number.
+     *  x(k=0|k=0) = Expected value of x at time-0 (i.e. x(k=0)), typically set to zero.
+     *  Rv, Rn     = Covariance matrices of process & measurement. As this implementation 
      *                the noise as AWGN (and same value for every variable), this is set
      *                to Rv=diag(RvInit,...,RvInit) and Rn=diag(RnInit,...,RnInit).
      */
-    X_Est = XInit;
-    P.vIsiDiagonal(PInit);
-    Rv.vIsiDiagonal(RvInit);
-    Rn.vIsiDiagonal(RnInit);
+    this->X_Est = XInit;
+    this->P     = PInit;
+    this->Rv    = Rv;
+    this->Rn    = Rn;
     this->bNonlinearUpdateX = bNonlinearUpdateX;
     this->bNonlinearUpdateY = bNonlinearUpdateY;
     
@@ -113,10 +115,10 @@ UKF::UKF(Matrix &XInit, bool (*bNonlinearUpdateX)(Matrix &, Matrix &, Matrix &),
     /* Van der. Merwe, .. (2004). Sigma-Point Kalman Filters for Probabilistic Inference in Dynamic State-Space Models 
      * (Ph.D. thesis). Oregon Health & Science University. Page 6:
      * 
-     * where λ = α2(L+κ)−L is a scaling parameter. α determines the spread of the sigma points around ̄x and is usually 
-     * set to a small positive value (e.g. 1e−2 ≤ α ≤ 1). κ is a secondary scaling parameter which is usually set to either 
-     * 0 or 3−L (see [45] for details), and β is an extra degree of freedom scalar parameter used to incorporate any extra 
-     * prior knowledge of the distribution of x (for Gaussian distributions, β = 2 is optimal).
+     * where λ = α2(L+κ)−L is a scaling parameter. α determines the spread of the sigma points around ̄x and is usually
+     * set to a small positive value (e.g. 1e−2 ≤ α ≤ 1). κ is a secondary scaling parameter which is usually set to
+     * either 0 or 3−L (see [45] for details), and β is an extra degree of freedom scalar parameter used to 
+     * incorporate any extra prior knowledge of the distribution of x (for Gaussian distributions, β = 2 is optimal).
      */
     float_prec _alpha   = 1e-2;
     float_prec _k       = 0.0;
@@ -129,26 +131,26 @@ UKF::UKF(Matrix &XInit, bool (*bNonlinearUpdateX)(Matrix &, Matrix &, Matrix &),
 
     /* Wm = [lambda/(N+lambda)         1/(2(N+lambda)) ... 1/(2(N+lambda))]     ...{UKF_2} */
     Wm[0][0] = _lambda/(SS_X_LEN + _lambda);
-    for (int32_t _i = 1; _i < Wm.i32getKolom(); _i++) {
+    for (int16_t _i = 1; _i < Wm.i16getCol(); _i++) {
         Wm[0][_i] = 0.5/(SS_X_LEN + _lambda);
     }
     
     /* Wc = [Wm(0)+(1-alpha(^2)+beta)  1/(2(N+lambda)) ... 1/(2(N+lambda))]     ...{UKF_3} */
-    Wc = Wm.Salin();
+    Wc = Wm;
     Wc[0][0] = Wc[0][0] + (1.0-(_alpha*_alpha)+_beta);
 }
 
 
-void UKF::vReset(Matrix &XInit, const float_prec PInit, const float_prec RvInit, const float_prec RnInit)
+void UKF::vReset(const Matrix& XInit, const Matrix& PInit, const Matrix& Rv, const Matrix& Rn)
 {
-    X_Est = XInit;
-    P.vIsiDiagonal(PInit);
-    Rv.vIsiDiagonal(RvInit);
-    Rn.vIsiDiagonal(RnInit);
+    this->X_Est = XInit;
+    this->P     = PInit;
+    this->Rv    = Rv;
+    this->Rn    = Rn;
 }
 
 
-bool UKF::bUpdate(Matrix &Y, Matrix &U)
+bool UKF::bUpdate(const Matrix& Y, const Matrix& U)
 {
     /* Run once every sampling time */
 
@@ -172,8 +174,8 @@ bool UKF::bUpdate(Matrix &Y, Matrix &U)
     /* Calculate Cross-Covariance Matrix:
      *  Pxy(k) = sum(Wc(i)*DX*DY(i))            ; i = 1 ... (2N+1)          ...{UKF_9}
      */
-    for (int32_t _i = 0; _i < DX.i32getBaris(); _i++) {
-        for (int32_t _j = 0; _j < DX.i32getKolom(); _j++) {
+    for (int16_t _i = 0; _i < DX.i16getRow(); _i++) {
+        for (int16_t _j = 0; _j < DX.i16getCol(); _j++) {
             DX[_i][_j] *= Wc[0][_j];
         }
     }
@@ -183,8 +185,8 @@ bool UKF::bUpdate(Matrix &Y, Matrix &U)
     /* Calculate the Kalman Gain:
      *  K           = Pxy(k) * (Py(k)^-1)                                   ...{UKF_10}
      */
-    Matrix PyInv = Py.Invers();
-    if (!PyInv.bCekMatrixValid()) {
+    Matrix PyInv(Py.Invers());
+    if (!PyInv.bMatrixIsValid()) {
         return false;
     }
     Gain = Pxy * PyInv;
@@ -214,7 +216,7 @@ bool UKF::bCalculateSigmaPoint(void)
      */
     /* Use Cholesky Decomposition to compute sqrt(P) */
     P_Chol = P.CholeskyDec();
-    if (!P_Chol.bCekMatrixValid()) {
+    if (!P_Chol.bMatrixIsValid()) {
         /* System Fail */
         return false;
     }
@@ -222,11 +224,11 @@ bool UKF::bCalculateSigmaPoint(void)
     
     /* Xs(k-1) = [x(k-1) ... x(k-1)]            ; Xs(k-1) = NxN */
     Matrix _Y(SS_X_LEN, SS_X_LEN);
-    for (int32_t _i = 0; _i < SS_X_LEN; _i++) {
+    for (int16_t _i = 0; _i < SS_X_LEN; _i++) {
         _Y = _Y.InsertVector(X_Est, _i);
     }
     
-    X_Sigma.vIsiNol();
+    X_Sigma.vSetToZero();
     /* XSigma(k-1) = [x(k-1) 0 0] */
     X_Sigma = X_Sigma.InsertVector(X_Est, 0);
     /* XSigma(k-1) = [x(k-1) Xs(k-1)+GPsq  0] */
@@ -237,19 +239,19 @@ bool UKF::bCalculateSigmaPoint(void)
     return true;
 }
 
-bool UKF::bUnscentedTransform(Matrix &Out, Matrix &OutSigma, Matrix &P, Matrix &DSig,
-                              bool (*_vFuncNonLinear)(Matrix &xOut, Matrix &xInp, Matrix &U),
-                              Matrix &InpSigma, Matrix &InpVector,
-                              Matrix &_CovNoise)
+bool UKF::bUnscentedTransform(Matrix& Out, Matrix& OutSigma, Matrix& P, Matrix& DSig,
+                              bool (*_vFuncNonLinear)(Matrix& xOut, const Matrix& xInp, const Matrix& U),
+                              const Matrix& InpSigma, const Matrix& InpVector,
+                              const Matrix& _CovNoise)
 {
     /* XSigma(k) = f(XSigma(k-1), u(k-1))                                  ...{UKF_5a}  */
     /* x(k|k-1) = sum(Wm(i) * XSigma(k)(i))    ; i = 1 ... (2N+1)          ...{UKF_6a}  */
-    Out.vIsiNol();
-    for (int32_t _j = 0; _j < InpSigma.i32getKolom(); _j++) {
+    Out.vSetToZero();
+    for (int16_t _j = 0; _j < InpSigma.i16getCol(); _j++) {
         /* Transform the column submatrix of sigma-points input matrix (InpSigma) */
-        Matrix _AuxSigma1(InpSigma.i32getBaris(), 1);
-        Matrix _AuxSigma2(OutSigma.i32getBaris(), 1);
-        for (int32_t _i = 0; _i < InpSigma.i32getBaris(); _i++) {
+        Matrix _AuxSigma1(InpSigma.i16getRow(), 1);
+        Matrix _AuxSigma2(OutSigma.i16getRow(), 1);
+        for (int16_t _i = 0; _i < InpSigma.i16getRow(); _i++) {
             _AuxSigma1[_i][0] = InpSigma[_i][_j];
         }
         if (!_vFuncNonLinear(_AuxSigma2, _AuxSigma1, InpVector)) {
@@ -267,16 +269,16 @@ bool UKF::bUnscentedTransform(Matrix &Out, Matrix &OutSigma, Matrix &P, Matrix &
 
     /* DX = XSigma(k)(i) - Xs(k)   ; Xs(k) = [x(k|k-1) ... x(k|k-1)]
      *                             ; Xs(k) = Nx(2N+1)                      ...{UKF_7a}  */
-    Matrix _AuxSigma1(OutSigma.i32getBaris(), OutSigma.i32getKolom());
-    for (int32_t _j = 0; _j < OutSigma.i32getKolom(); _j++) {
+    Matrix _AuxSigma1(OutSigma.i16getRow(), OutSigma.i16getCol());
+    for (int16_t _j = 0; _j < OutSigma.i16getCol(); _j++) {
         _AuxSigma1 = _AuxSigma1.InsertVector(Out, _j);
     }
     DSig = OutSigma - _AuxSigma1;
 
     /* P(k|k-1) = sum(Wc(i)*DX*DX') + Rv       ; i = 1 ... (2N+1)          ...{UKF_8a}  */
-    _AuxSigma1 = DSig.Salin();
-    for (int32_t _i = 0; _i < DSig.i32getBaris(); _i++) {
-        for (int32_t _j = 0; _j < DSig.i32getKolom(); _j++) {
+    _AuxSigma1 = DSig;
+    for (int16_t _i = 0; _i < DSig.i16getRow(); _i++) {
+        for (int16_t _j = 0; _j < DSig.i16getCol(); _j++) {
             _AuxSigma1[_i][_j] *= Wc[0][_j];
         }
     }
@@ -284,7 +286,4 @@ bool UKF::bUnscentedTransform(Matrix &Out, Matrix &OutSigma, Matrix &P, Matrix &
 
     return true;
 }
-
-
-
 

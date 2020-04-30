@@ -1,13 +1,6 @@
-#include <Wire.h>
-#include <elapsedMillis.h>
-#include "konfig.h"
-#include "matrix.h"
-#include "ukf.h"
-
-
-
-
-/* In this example, we will simulate the damped pendulum:
+/*************************************************************************************************************
+ * 
+ * In this example, we will simulate the damped pendulum:
  *  - The input u           : none
  *  - The state variable x  : [theta dtheta/dt]'    (angle and angular speed of the pendulum)
  *  - The output y          : [x y]'                (coordinate position of the ball)
@@ -22,7 +15,8 @@
  *      y = -cos(theta) * l
  * 
  * *See https://en.wikipedia.org/wiki/Pendulum_(mathematics)#Simple_gravity_pendulum for undamped model, 
- * *See http://www.nld.ds.mpg.de/applets/pendulum/eqm1.htm or http://www.nld.ds.mpg.de/applets/pendulum/eqm2.htm for the damped model.
+ * *See http://www.nld.ds.mpg.de/applets/pendulum/eqm1.htm or
+ *      http://www.nld.ds.mpg.de/applets/pendulum/eqm2.htm for the damped model.
  * 
  * 
  * 
@@ -46,31 +40,63 @@
  *      y1(k) =  sin(x1(k)) * l
  *      y2(k) = -cos(x1(k)) * l
  * 
- */
+ * 
+ * See https://github.com/pronenewbits for more!
+ ************************************************************************************************************/
+#include <Wire.h>
+#include <elapsedMillis.h>
+#include "konfig.h"
+#include "matrix.h"
+#include "ukf.h"
+
+
+/* =============================================== The pendulum model constants =============================================== */
 #define pend_g      (9.81)          /* gravitation constant */
 #define pend_l      (5)             /* length of the pendulum rod, in meters */
 #define pend_alpha  (0.3)           /* damping factor */
 
 
-/* Just example */
-#define P_INIT      (100)
+
+/* ============================================ UKF variables/function declaration ============================================ */
+/* Just example; in konfig.h: 
+ *  SS_X_LEN = 2
+ *  SS_Z_LEN = 2
+ *  SS_U_LEN = 0 
+ */
+/* UKF initialization constant -------------------------------------------------------------------------------------- */
+#define P_INIT      (100.)
 #define Rv_INIT     (0.01)
 #define Rn_INIT     (1.)
-
-
-bool Main_bUpdateNonlinearX(Matrix &X_Next, Matrix &X, Matrix &U);
-bool Main_bUpdateNonlinearY(Matrix &Y, Matrix &X, Matrix &U);
-
-elapsedMillis timerLed, timerUKF;
-uint64_t u64compuTime;
-
+/* P(k=0) variable -------------------------------------------------------------------------------------------------- */
+float_prec UKF_PINIT_data[SS_X_LEN*SS_X_LEN] = {P_INIT, 0,
+                                                0,      P_INIT};
+Matrix UKF_PINIT(SS_X_LEN, SS_X_LEN, UKF_PINIT_data);
+/* Rv constant ------------------------------------------------------------------------------------------------------- */
+float_prec UKF_RVINIT_data[SS_X_LEN*SS_X_LEN] = {Rv_INIT, 0,
+                                                0,      Rv_INIT};
+Matrix UKF_RvINIT(SS_X_LEN, SS_X_LEN, UKF_RVINIT_data);
+/* R constant ------------------------------------------------------------------------------------------------------- */
+float_prec UKF_RNINIT_data[SS_Z_LEN*SS_Z_LEN] = {Rn_INIT, 0,
+                                                 0,      Rn_INIT};
+Matrix UKF_RnINIT(SS_Z_LEN, SS_Z_LEN, UKF_RNINIT_data);
+/* Nonlinear & linearization function ------------------------------------------------------------------------------- */
+bool Main_bUpdateNonlinearX(Matrix& X_Next, const Matrix& X, const Matrix& U);
+bool Main_bUpdateNonlinearY(Matrix& Y, const Matrix& X, const Matrix& U);
+/* UKF variables ---------------------------------------------------------------------------------------------------- */
 Matrix X_true(SS_X_LEN, 1);
 Matrix X_est_init(SS_X_LEN, 1);
 Matrix Y(SS_Z_LEN, 1);
 Matrix U(SS_U_LEN, 1);
-UKF UKF_IMU(X_est_init, Main_bUpdateNonlinearX, Main_bUpdateNonlinearY, P_INIT, Rv_INIT, Rn_INIT);
+/* UKF system declaration ------------------------------------------------------------------------------------------- */
+UKF UKF_IMU(X_est_init, UKF_PINIT, UKF_RvINIT, UKF_RnINIT, Main_bUpdateNonlinearX, Main_bUpdateNonlinearY);
 
+
+
+/* ========================================= Auxiliary variables/function declaration ========================================= */
+elapsedMillis timerLed, timerUKF;
+uint64_t u64compuTime;
 char bufferTxSer[100];
+
 
 
 void setup() {
@@ -78,21 +104,25 @@ void setup() {
     Serial.begin(115200);
     while(!Serial) {}
     
-    
+    X_true.vSetToZero();
+    X_est_init.vSetToZero();
     
     /* For example, let's set the theta(k=0) = pi/2     (i.e. the pendulum rod is parallel with the horizontal plane) */
     X_true[0][0] = 3.14159265359/2.;
     
     /* Observe that we set the wrong initial x_estimated value!  (X_UKF(k=0) != X_TRUE(k=0)) */
-    X_est_init[0][0] = -3.14159265359;
+    X_est_init[0][0] = -3.14159265359/2;
     
-    UKF_IMU.vReset(X_est_init, P_INIT, Rv_INIT, Rn_INIT);
+    UKF_IMU.vReset(X_est_init, UKF_PINIT, UKF_RvINIT, UKF_RnINIT);
 }
 
-void loop() {
-    if (timerUKF > SS_DT_MILIS) {
-        /* ================== Read the sensor data / simulate the system here ================== */
 
+void loop() {
+    if (timerUKF >= SS_DT_MILIS) {
+        timerUKF = 0;
+        
+        
+        /* ================== Read the sensor data / simulate the system here ================== */
         /*  The update function in discrete time:
          *      x1(k+1) = x1(k) + x2(k)*dt
          *      x2(k+1) = x2(k) - g/l*sin(x1(k))*dt - damping_factor*x2*dt
@@ -112,45 +142,47 @@ void loop() {
         Y[1][0] = -cos(theta) * pend_l;
         
         /* Let's add some noise! */
-        Y[0][0] += (float((rand() % 20) - 10) / 10.);       /* add +/- 1 meters noise to x position */
-        
+        Y[0][0] += (float((rand() % 20) - 10) / 10.);   /* add +/- 1 meter noise to x position */
         /* ------------------ Read the sensor data / simulate the system here ------------------ */
-        
         
         
         /* ============================= Update the Kalman Filter ============================== */
         u64compuTime = micros();
         if (!UKF_IMU.bUpdate(Y, U)) {
-            X_est_init.vIsiNol();
-            UKF_IMU.vReset(X_est_init, P_INIT, Rv_INIT, Rn_INIT);
+            X_est_init.vSetToZero();
+            UKF_IMU.vReset(X_est_init, UKF_PINIT, UKF_RvINIT, UKF_RnINIT);
             Serial.println("Whoop ");
         }
         u64compuTime = (micros() - u64compuTime);
         /* ----------------------------- Update the Kalman Filter ------------------------------ */
         
         
-        
         /* =========================== Print to serial (for plotting) ========================== */
         #if (0)
             /* Print: Computation time, x1 (without noise), x1 estimated */
-            snprintf(bufferTxSer, sizeof(bufferTxSer)-1, "%.3f %.3f %.3f ", ((float)u64compuTime)/1000., X_true[0][0], UKF_IMU.GetX()[0][0]);
+            snprintf(bufferTxSer, sizeof(bufferTxSer)-1, "%.3f %.3f %.3f ", ((float)u64compuTime)/1000.,
+                                                                            X_true[0][0], UKF_IMU.GetX()[0][0]);
             Serial.print(bufferTxSer);
         #else
             /* Print: Computation time, y1 (with noise), y1 (without noise), y1 estimated */
-            snprintf(bufferTxSer, sizeof(bufferTxSer)-1, "%.3f %.3f %.3f %.3f ", ((float)u64compuTime)/1000., Y[0][0], sin(X_true[0][0])*pend_l, sin(UKF_IMU.GetX()[0][0])*pend_l);
+            snprintf(bufferTxSer, sizeof(bufferTxSer)-1, "%.3f %.3f %.3f %.3f ", ((float)u64compuTime)/1000.,
+                                                                                 Y[0][0],
+                                                                                 sin(X_true[0][0])*pend_l,
+                                                                                 sin(UKF_IMU.GetX()[0][0])*pend_l);
             Serial.print(bufferTxSer);
         #endif
         Serial.print('\n');
         /* --------------------------- Print to serial (for plotting) -------------------------- */
-        
-        
-        timerUKF = 0;
     }
 }
 
-bool Main_bUpdateNonlinearX(Matrix &X_Next, Matrix &X, Matrix &U)
+
+bool Main_bUpdateNonlinearX(Matrix& X_Next, const Matrix& X, const Matrix& U)
 {
-    /*  The update function in discrete time:
+    /* Insert the nonlinear update transformation here
+     *          x(k+1) = f[x(k), u(k)]
+     *
+     *  The update function in discrete time:
      *      x1(k+1) = x1(k) + x2(k)*dt
      *      x2(k+1) = x2(k) - g/l*sin(x1(k))*dt - alpha*x2*dt
      */
@@ -170,9 +202,12 @@ bool Main_bUpdateNonlinearX(Matrix &X_Next, Matrix &X, Matrix &U)
     return true;
 }
 
-bool Main_bUpdateNonlinearY(Matrix &Y, Matrix &X, Matrix &U)
+bool Main_bUpdateNonlinearY(Matrix& Y, const Matrix& X, const Matrix& U)
 {
-    /*  The output (in discrete time):
+    /* Insert the nonlinear measurement transformation here
+     *          y(k)   = h[x(k), u(k)]
+     *
+     *  The output (in discrete time):
      *      y1(k) =  sin(x1(k)) * l
      *      y2(k) = -cos(x1(k)) * l
      */
@@ -186,3 +221,16 @@ bool Main_bUpdateNonlinearY(Matrix &Y, Matrix &X, Matrix &U)
 
 
 
+
+
+void SPEW_THE_ERROR(char const * str)
+{
+    #if (SYSTEM_IMPLEMENTATION == SYSTEM_IMPLEMENTATION_PC)
+        cout << (str) << endl;
+    #elif (SYSTEM_IMPLEMENTATION == SYSTEM_IMPLEMENTATION_EMBEDDED_ARDUINO)
+        Serial.println(str);
+    #else
+        /* Silent function */
+    #endif
+    while(1);
+}
