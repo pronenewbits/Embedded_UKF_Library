@@ -55,7 +55,7 @@ And set the UKF initial pendulum angle `(theta(k=0))` as different with the true
     X_true[0][0] = 3.14159265359/2.;
     
     /* Observe that we set the wrong initial x_estimated value!  (X_UKF(k=0) != X_TRUE(k=0)) */
-    X_est_init[0][0] = -3.14159265359/2;
+    X_est_init[0][0] = -3.14159265359/2.;
     
 And then plot the estimated x-position of the bob. The result, plotted using [Scilab](https://www.scilab.org/) (you can see at the beginning, the estimated value is converging to the truth despite wrong initial value):
 <p align="center"><img src="result.png" alt="Result for Pendulum simulation"></p>
